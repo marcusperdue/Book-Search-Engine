@@ -5,6 +5,7 @@ import { ApolloClient, InMemoryCache } from '@apollo/client';
 
 import Navbar from './components/Navbar';
 
+
 const client = new ApolloClient({
   uri: '/graphql',  
   cache: new InMemoryCache(),

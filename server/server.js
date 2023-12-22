@@ -1,9 +1,6 @@
 const express = require('express');
 const path = require('path');
 const db = require('./config/connection');
-const routes = require('./routes');
-
-
 const { ApolloServer } = require('apollo-server-express');
 const { typeDefs, resolvers } = require('../schemas');
 const { authMiddleware } = require('./utils/auth');
@@ -17,25 +14,26 @@ app.use(express.json());
 const server = new ApolloServer({
   typeDefs,
   resolvers,
-  context: authMiddleware,  
+  context: ({ req }) => {
+    // Use authMiddleware to add the user to the context
+    const user = authMiddleware(req);
+    return { user };
+  },
+  introspection: true,
 });
 
-// if we're in production, serve client/build as static assets
+// Serve static files in production
 if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, '../client/build')));
+  app.use(express.static(path.join(__dirname, '../client/dist')));
+
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../client/dist/index.html'));
+  });
 }
 
-app.use(routes);
-
-
-
+// Start the Apollo Server
 server.start().then(() => {
- 
-  server.applyMiddleware({ app });
-
-  if (process.env.NODE_ENV === 'production') {
-    app.use(express.static(path.join(__dirname, '../client/build')));
-  }
+  server.applyMiddleware({ app, path: '/graphql' });
 
   db.once('open', () => {
     app.listen(PORT, () => {

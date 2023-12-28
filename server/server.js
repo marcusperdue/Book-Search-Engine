@@ -26,7 +26,7 @@ const startApolloServer = async () => {
 
   // Serve static files in production
   if (process.env.NODE_ENV === 'production') {
-    app.use(express.static(path.join(__dirname, '../client/dist')));
+    app.use(express.static(path.join(__dirname, './client/dist')));
   }
 
   // Other Express routes

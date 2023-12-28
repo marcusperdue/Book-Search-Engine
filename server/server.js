@@ -5,8 +5,10 @@ const routes = require('./routes');
 const { ApolloServer } = require('@apollo/server');
 const { expressMiddleware } = require('@apollo/server/express4');
 const { typeDefs, resolvers } = require('./schemas');
+const cors = require('cors');
 
 const app = express();
+app.use(cors());
 const PORT = process.env.PORT || 3001;
 
 // Initialize Apollo Server

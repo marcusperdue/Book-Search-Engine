@@ -1,13 +1,14 @@
-// see SignupForm.js for comments
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Form, Button, Alert } from 'react-bootstrap';
-import { useMutation } from '@apollo/client'; 
+import { useMutation } from '@apollo/client';
 import { LOGIN_USER } from '../utils/mutations';
 import Auth from '../utils/auth';
 
 const LoginForm = () => {
+  const navigate = useNavigate(); 
   const [userFormData, setUserFormData] = useState({ email: '', password: '' });
-  const [validated] = useState(false);
+  const [validated, setValidated] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
   const [loginUser] = useMutation(LOGIN_USER);
 
@@ -15,41 +16,48 @@ const LoginForm = () => {
     const { name, value } = event.target;
     setUserFormData({ ...userFormData, [name]: value });
   };
-
+  
   const handleFormSubmit = async (event) => {
     event.preventDefault();
+    setShowAlert(false); // Reset the alert
 
-    // check if form has everything (as per react-bootstrap docs)
     const form = event.currentTarget;
-    if (form.checkValidity() === false) {
-      event.preventDefault();
+    if (!form.checkValidity()) {
       event.stopPropagation();
+      setValidated(true); // Trigger form validation feedback
+      return;
     }
 
-   try {
-      // Execute the LOGIN_USER mutation
+    try {
       const { data } = await loginUser({
         variables: userFormData,
       });
 
-      Auth.login(data.login.token);
-
+      if (data.login.token) {
+        Auth.login(data.login.token);
+        navigate('/'); // Redirect to dashboard or home page
+      } else {
+        console.error('Login failed. Server returned an invalid token:', data);
+        setShowAlert(true);
+      }
     } catch (err) {
-      console.error(err);
+      console.error('Error during login:', err.message);
       setShowAlert(true);
     }
 
-    setUserFormData({
-      username: '',
-      email: '',
-      password: '',
-    });
+    setUserFormData({ email: '', password: '' }); // Reset the form data
+    setValidated(false); // Reset the validated state
   };
-
+ 
   return (
     <>
       <Form noValidate validated={validated} onSubmit={handleFormSubmit}>
-        <Alert dismissible onClose={() => setShowAlert(false)} show={showAlert} variant='danger'>
+        <Alert
+          dismissible
+          onClose={() => setShowAlert(false)}
+          show={showAlert}
+          variant='danger'
+        >
           Something went wrong with your login credentials!
         </Alert>
         <Form.Group className='mb-3'>
@@ -80,7 +88,8 @@ const LoginForm = () => {
         <Button
           disabled={!(userFormData.email && userFormData.password)}
           type='submit'
-          variant='success'>
+          variant='success'
+        >
           Submit
         </Button>
       </Form>

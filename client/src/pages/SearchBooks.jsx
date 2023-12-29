@@ -5,15 +5,14 @@ import {
   Form,
   Button,
   Card,
-  Row
+  Row,
 } from 'react-bootstrap';
 
 import Auth from '../utils/auth';
 import { searchGoogleBooks } from '../utils/API';
 import { saveBookIds, getSavedBookIds } from '../utils/localStorage';
-import { useMutation } from '@apollo/client';  
-import { SAVE_BOOK } from '../utils/mutations'; 
-
+import { useMutation } from '@apollo/client';
+import { SAVE_BOOK } from '../utils/mutations';
 
 const SearchBooks = () => {
   // create state for holding returned google api data
@@ -29,8 +28,12 @@ const SearchBooks = () => {
   // set up useEffect hook to save `savedBookIds` list to localStorage on component unmount
   // learn more here: https://reactjs.org/docs/hooks-effect.html#effects-with-cleanup
   useEffect(() => {
-    return () => saveBookIds(savedBookIds);
-  });
+    const cleanup = () => {
+      saveBookIds(savedBookIds);
+    };
+    return cleanup;
+  }, [savedBookIds]);
+
 
   // create method to search for books and set state on form submit
   const handleFormSubmit = async (event) => {
@@ -58,31 +61,42 @@ const SearchBooks = () => {
       }));
 
       setSearchedBooks(bookData);
-      setSearchInput('');
+      setSearchInput(''); // Clear the search input after a successful search
     } catch (err) {
       console.error(err);
     }
   };
 
   // create function to handle saving a book to our database
-const handleSaveBook = async (bookId) => {
+  const handleSaveBook = async (bookId) => {
     const bookToSave = searchedBooks.find((book) => book.bookId === bookId);
     const token = Auth.loggedIn() ? Auth.getToken() : null;
 
     if (!token) {
       return false;
     }
+    if (!bookToSave) {
+      console.error(`Book with bookId ${bookId} not found.`);
+      return;
+    }
+  
 
-    try {
-      // Execute the SAVE_BOOK mutation
-      const { data } = await saveBookMutation({
-        variables: { input: bookToSave }, // Pass the book data as input
-      });
+   try {
+   
+  await saveBookMutation({
+    variables: {
+      input: {
+        bookId: bookToSave.bookId,
+        authors: bookToSave.authors,
+        description: bookToSave.description,
+        title: bookToSave.title,
+        image: bookToSave.image,
+      },
+    },
+  });
 
-      if (data.saveBook) {
-        // If the mutation is successful, update the savedBookIds state
-        setSavedBookIds([...savedBookIds, bookToSave.bookId]);
-      }
+      // Update the savedBookIds state if the mutation is successful
+      setSavedBookIds([...savedBookIds, bookId]);
     } catch (err) {
       console.error(err);
     }

@@ -4,16 +4,16 @@ import { useMutation } from '@apollo/client';
 import { ADD_USER } from '../utils/mutations';
 import Auth from '../utils/auth';
 
+ 
 const SignupForm = () => {
   // set initial form state
   const [userFormData, setUserFormData] = useState({ username: '', email: '', password: '' });
   // set state for form validation
-  const [validated] = useState(false);
+  const [validated, setValidated] = useState(false);
   // set state for alert
   const [showAlert, setShowAlert] = useState(false);
 
   const [addUser] = useMutation(ADD_USER);
-
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
@@ -22,37 +22,44 @@ const SignupForm = () => {
 
   const handleFormSubmit = async (event) => {
     event.preventDefault();
-
+  
     // check if form has everything (as per react-bootstrap docs)
     const form = event.currentTarget;
     if (form.checkValidity() === false) {
-      event.preventDefault();
       event.stopPropagation();
+      setValidated(true); // Trigger form validation feedback
+      return;
     }
-
+  
+    if (userFormData.password.length < 8) {
+      console.error("Password must be at least 8 characters long.");
+      setShowAlert(true);
+      return; // Stop the form submission if password is too short
+    }
+  
     try {
-      // Use the ADD_USER mutation instead of createUser
+      // Use the ADD_USER mutation
       const { data } = await addUser({
         variables: userFormData,
       });
-
+      localStorage.setItem('token', data.addUser.token);
       Auth.login(data.addUser.token);
+  
+      // Reset form data and validation state
+      setUserFormData({
+        username: '',
+        email: '',
+        password: '',
+      });
+      setValidated(false); // Reset validation state after successful submission
     } catch (err) {
-      // Enhanced error handling
       console.error("Error details:", err.message);
       if (err.networkError) console.error("Network error:", err.networkError);
       if (err.graphQLErrors) {
         err.graphQLErrors.forEach(e => console.error("GraphQL error:", e.message));
       }
-  
       setShowAlert(true);
     }
-
-    setUserFormData({
-      username: '',
-      email: '',
-      password: '',
-    });
   };
 
   return (

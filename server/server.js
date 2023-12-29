@@ -1,7 +1,6 @@
 const express = require('express');
 const path = require('path');
 const db = require('./config/connection');
-const routes = require('./routes');
 const { ApolloServer } = require('@apollo/server');
 const { expressMiddleware } = require('@apollo/server/express4');
 const { typeDefs, resolvers } = require('./schemas');
@@ -15,6 +14,10 @@ const PORT = process.env.PORT || 3001;
 const server = new ApolloServer({
   typeDefs,
   resolvers,
+  formatError: (error) => {
+    // Log or format your GraphQL errors here
+    return error;
+  },
 });
 
 const startApolloServer = async () => {
@@ -30,9 +33,7 @@ const startApolloServer = async () => {
   if (process.env.NODE_ENV === 'production') {
     app.use(express.static(path.join(__dirname, './client/dist')));
   }
-
-  // Other Express routes
-  app.use(routes);
+ 
 
   // Start the Express server
   app.listen(PORT, () => {

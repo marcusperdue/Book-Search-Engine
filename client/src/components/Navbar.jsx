@@ -1,50 +1,41 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Navbar, Nav, Container, Modal, Tab } from 'react-bootstrap';
 import SignUpForm from './SignupForm';
 import LoginForm from './LoginForm';
+
 import Auth from '../utils/auth';
 
 const AppNavbar = () => {
+  // set modal display state
   const [showModal, setShowModal] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(Auth.loggedIn());
-
-  // Update login state when Auth state changes
-  useEffect(() => {
-    setIsLoggedIn(Auth.loggedIn());
-  }, []);
-
-  const handleLogout = () => {
-    Auth.logout();
-    setIsLoggedIn(false); // Update the login state
-  };
 
   return (
     <>
-     <Navbar bg='dark' variant='dark' expand='lg'>
-  <Container fluid>
-    <Navbar.Brand as={Link} to='/'>
-      Google Books Search
-    </Navbar.Brand>
-    <Navbar.Toggle aria-controls='navbar' />
-    <Navbar.Collapse id='navbar' className='d-flex flex-row-reverse'>
-      <Nav className='ml-auto d-flex'>
-        <Nav.Link as={Link} to='/'>
-          Search For Books
-        </Nav.Link>
-        {/* if user is logged in show saved books and logout */}
-        {Auth.loggedIn() ? (
-          <>
-            <Nav.Link as={Link} to='/saved'>
-              See Your Books
-            </Nav.Link>
-            <Nav.Link onClick={handleLogout}>Logout</Nav.Link> {/* Updated to use handleLogout */}
-          </>
-        ) : (
-          <Nav.Link onClick={() => setShowModal(true)}>Login/Sign Up</Nav.Link>
-        )}
-      </Nav>
-    </Navbar.Collapse>
+      <Navbar bg='dark' variant='dark' expand='lg'>
+        <Container fluid>
+          <Navbar.Brand as={Link} to='/'>
+            Google Books Search
+          </Navbar.Brand>
+          <Navbar.Toggle aria-controls='navbar' />
+          <Navbar.Collapse id='navbar' className='d-flex flex-row-reverse'>
+            <Nav className='ml-auto d-flex'>
+              <Nav.Link as={Link} to='/'>
+                Search For Books
+              </Nav.Link>
+              {/* if user is logged in show saved books and logout */}
+              {Auth.loggedIn() ? (
+                <>
+                  <Nav.Link as={Link} to='/saved'>
+                    See Your Books
+                  </Nav.Link>
+                  <Nav.Link onClick={Auth.logout}>Logout</Nav.Link>
+                </>
+              ) : (
+                <Nav.Link onClick={() => setShowModal(true)}>Login/Sign Up</Nav.Link>
+              )}
+            </Nav>
+          </Navbar.Collapse>
         </Container>
       </Navbar>
       {/* set modal data up */}

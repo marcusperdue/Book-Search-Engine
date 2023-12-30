@@ -7,24 +7,28 @@ import {
   Col
 } from 'react-bootstrap';
 import { useQuery, useMutation } from '@apollo/client';
-import { GET_ME } from '../utils/queries';
 import { REMOVE_BOOK } from '../utils/mutations';
-import Auth from '../utils/auth'; 
+import { GET_ME } from '../utils/queries';
+import Auth from '../utils/auth';
 import { removeBookId } from '../utils/localStorage';
 
 const SavedBooks = () => {
-  const [userData, setUserData] = useState({ savedBooks: [] });
+  const [userData, setUserData] = useState({});
 
+  // Use the useQuery hook to execute the GET_ME query on load
   const { loading, data } = useQuery(GET_ME);
 
-  const [removeBookMutation] = useMutation(REMOVE_BOOK);
-  
+  // Use the useMutation hook to execute the REMOVE_BOOK mutation
+  const [removeBook] = useMutation(REMOVE_BOOK);
+
   useEffect(() => {
-    if (data && data.me) {
+    // Check if data is available and setUserData accordingly
+    if (data) {
       setUserData(data.me);
     }
   }, [data]);
 
+  // Create function to handle book deletion
   const handleDeleteBook = async (bookId) => {
     const token = Auth.loggedIn() ? Auth.getToken() : null;
 
@@ -33,19 +37,22 @@ const SavedBooks = () => {
     }
 
     try {
-      const { data } = await removeBookMutation({
+      // Execute the REMOVE_BOOK mutation
+      const { data } = await removeBook({
         variables: { bookId },
       });
 
-      const updatedUser = data?.removeBook || userData;
+      // Update userData with the new data from the mutation
+      setUserData(data.removeBook);
 
-      setUserData(updatedUser);
+      // Upon success, remove the book's id from localStorage
       removeBookId(bookId);
     } catch (err) {
       console.error(err);
     }
   };
 
+  // If data isn't here yet or loading, say so
   if (loading) {
     return <h2>LOADING...</h2>;
   }

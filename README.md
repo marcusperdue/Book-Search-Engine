@@ -22,11 +22,11 @@ This project is a full-stack application that allows users to search for books u
 </div>
 
 ## Deployment
-The application is deployed on Render and can be accessed [here](https://mern-challenge-book-search-engine.onrender.com/).
+The application is deployed on Render and can be accessed [here](https://google-book-search-r9o9.onrender.com/).
 
-[![screenshot1](./Screenshot%202024-01-01%20at%205.35.56%20PM.png)](https://mern-challenge-book-search-engine.onrender.com/)
+[![screenshot1](./Screenshot%202024-01-01%20at%205.35.56%20PM.png)](https://google-book-search-r9o9.onrender.com/)
 
-[![screenshot2](./Screenshot%202024-01-01%20at%206.17.09%20PM.png)](https://mern-challenge-book-search-engine.onrender.com/)
+[![screenshot2](./Screenshot%202024-01-01%20at%206.17.09%20PM.png)](https://google-book-search-r9o9.onrender.com/)
 
 ## Table of Contents
 - [Description](#description)
